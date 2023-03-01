@@ -17,21 +17,22 @@ parser.add_argument('--struct_neg', action='store_true', help='use structured ne
 parser.add_argument('--rna_seq', action='store_true', help='append RNA-seq to GNN embedding before prediction')
 parser.add_argument('--rank_loss', action='store_true', help='use a ranking-based loss function, will only work with structured negative sampling')
 parser.add_argument('--easy', action='store_true', help='easy test negative edges')
-parser.add_argument('--embed_size', type=int, default=10)
+parser.add_argument('--embed_size', type=int, default=10, help='size of the output embeddings')
+parser.add_argument('--cell_line', type=str, default='K562', help='choose the cell line: K562 or HepG2')
 args = parser.parse_args()
 
-link = 'Data/K562_PCA/link.dat'
-node = 'Data/K562_PCA/node.dat'
+link = f'{args.cell_line}_PCA/link.dat'
+node = f'{args.cell_line}_PCA/node.dat'
 if args.rna_seq:
-    node = 'Data/K562_PCA/node_seq.dat'
+    node = f'{args.cell_line}_PCA/node_seq.dat'
 data = load_pytg(link, node)
-test = 'Data/K562_PCA/link.dat.test'
-neg_mask_file = 'Data/K562_PCA/neg_mask.mtx'
+test = f'{args.cell_line}_PCA/link.dat.test'
+neg_mask_file = f'{args.cell_line}_PCA/neg_mask.mtx'
 data = predefined_test(data, test, neg_mask_file)
 if args.rna_seq:
     data.TPM = data.x[:,100].unsqueeze(1)
     data.x = torch.cat((data.x[:,:100], data.x[:,101:]), 1)
-best_mod = 'RBP_lp/best_model' + str(random()) + '.pt'
+best_mod = 'saved_models/best_model' + str(random()) + '.pt'
 print(data)
 
 
@@ -156,6 +157,6 @@ hits100 = eval_hits(y_pred_pos, y_pred_neg, 100)
 res = [data.test_pos_edge_index.size(1), args.weighted, args.rna_seq, args.struct_neg, args.rank_loss, auc, ap, hits10, hits50, hits100]
 # print(res)
 
-with open('results/res_K562_trans.csv', 'a', encoding='UTF8', newline='') as fd:
+with open(f'res_{args.cell_line}_trans.csv', 'a', encoding='UTF8', newline='') as fd:
     writer = csv.writer(fd)
     writer.writerow(res)
