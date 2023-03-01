@@ -10,6 +10,7 @@ python: 3.6.8
 pytorch: 1.8.1
 torch-geometric: 2.0.3
 scikit-learn: 0.24.2
+scipy: 1.5.4
 ```
 
 ## Instructions
