@@ -20,4 +20,4 @@ Each dataset contains:
 - Number of positive links = Number of negative links
 
 ### negative_mask.mtx
-- Sparse matrix containing the highly-likely negative links.
+- `scipy` sparse matrix containing the highly-likely negative links.
