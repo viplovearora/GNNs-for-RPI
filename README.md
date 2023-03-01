@@ -14,11 +14,16 @@ scipy: 1.5.4
 ```
 
 ## Instructions
-For transductive link prediction, use `RPI_gcn.py` to make predictions on the partitioned datasets stored in the `Data` folder. Use `--help` command to check the optional arguments.
+For transductive link prediction, use `RPI_gcn.py` to make predictions on the partitioned datasets stored in the `Data` folder. Use `--help` command to check the optional arguments. For example, use the following command to predict interactions using RNAseq:
+```
+python RPI_gcn.py --rna_seq
+```
 
 For transductive link prediction, use `gcn_drop.py` to make predictions on the protein selected using the `--test_prot` argument. Use `--help` command to check the other optional arguments.
 
 Run `gcn_transfer.py` for the transfer learning setting.
+
+See `README.md` in `Data` folder to see how the data is stored
 
 [1]: https://rnajournal.cshlp.org/content/28/11/1469.short
 [2]: https://www.biorxiv.org/content/10.1101/2021.09.28.462100v3.abstract
