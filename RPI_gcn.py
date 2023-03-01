@@ -2,6 +2,8 @@ import argparse
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+import csv
 
 from torch_geometric.nn import GCNConv
 from torch_geometric.utils import train_test_split_edges
@@ -38,7 +40,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
         self.conv1 = GCNConv(data.num_node_features, 50)
         self.conv2 = GCNConv(50, args.embed_size)
-#
+
     def encode(self):
         if args.weighted:
             x = self.conv1(data.x, data.train_pos_edge_index, data.edge_wt)
@@ -48,7 +50,7 @@ class Net(torch.nn.Module):
             x = self.conv1(data.x, data.train_pos_edge_index)
             x = x.relu()
             return self.conv2(x, data.train_pos_edge_index)
-#
+
     def decode(self, z, pos_edge_index, neg_edge_index):
         edge_index = torch.cat([pos_edge_index, neg_edge_index], dim=-1)
         logits = (z[edge_index[0]] * z[edge_index[1]]).sum(dim=-1)
@@ -76,12 +78,12 @@ def get_link_labels(pos_edge_index, neg_edge_index):
 
 def train():
     model.train()
-#
+
     if args.struct_neg:
         neg_edge_index = my_structured_negative_sampling(data).to(device)
     else:
         neg_edge_index = my_neg_sampling(edge_index=data.train_pos_edge_index, num_nodes=data.num_nodes, neg_mask=data.train_neg_adj_mask, negative_rate=2)
-#
+
     optimizer.zero_grad()
     z = model.encode()
     if args.rna_seq:
@@ -98,7 +100,7 @@ def train():
         loss = F.binary_cross_entropy_with_logits(link_logits, link_labels)
     loss.backward()
     optimizer.step()
-#
+
     return loss
 
 
@@ -109,7 +111,7 @@ def test():
     for prefix in ["val", "test"]:
         pos_edge_index = data[f'{prefix}_pos_edge_index']
         neg_edge_index = data[f'{prefix}_neg_edge_index']
-#
+
         z = model.encode()
         if args.rna_seq:
             z = torch.cat((z, data.TPM), 1)
@@ -142,7 +144,6 @@ link_logits = model_best.decode(z, data.test_pos_edge_index, data.test_neg_edge_
 link_probs = link_logits.sigmoid()
 link_labels = get_link_labels(data.test_pos_edge_index, data.test_neg_edge_index)
 
-from sklearn.metrics import average_precision_score
 auc = roc_auc_score(link_labels.cpu().detach(), link_probs.cpu().detach())
 ap = average_precision_score(link_labels.cpu().detach(), link_probs.cpu().detach())
 logits_pos = model_best.decode_rl(z, data.test_pos_edge_index)
@@ -155,7 +156,6 @@ hits100 = eval_hits(y_pred_pos, y_pred_neg, 100)
 res = [data.test_pos_edge_index.size(1), args.weighted, args.rna_seq, args.struct_neg, args.rank_loss, auc, ap, hits10, hits50, hits100]
 # print(res)
 
-import csv
 with open('results/res_K562_trans.csv', 'a', encoding='UTF8', newline='') as fd:
     writer = csv.writer(fd)
     writer.writerow(res)
