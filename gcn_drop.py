@@ -17,14 +17,15 @@ parser.add_argument('--struct_neg', action='store_true', help='use structured ne
 parser.add_argument('--rna_seq', action='store_true', help='append RNA-seq to GNN embedding before prediction')
 parser.add_argument('--rank_loss', action='store_true', help='use a ranking-based loss function, will only work with structured negative sampling')
 parser.add_argument('--use_ap', action='store_true', help='use average precision for model selection')
+parser.add_argument('--cell_line', type=str, default='K562', help='choose the cell line: K562 or HepG2')
 args = parser.parse_args()
 
-link = 'Data/HepG2_PCA/all_links.dat'
-node = 'Data/HepG2_PCA/node.dat'
+link = f'{args.cell_line}_PCA/all_links.dat'
+node = f'{args.cell_line}_PCA/node.dat'
 if args.rna_seq:
-    node = 'Data/HepG2_PCA/node_seq.dat'
+    node = f'{args.cell_line}_PCA/node_seq.dat'
 data = load_pytg(link, node)
-neg_mask_file = 'Data/HepG2_PCA/neg_mask.mtx'
+neg_mask_file = f'{args.cell_line}_PCA/neg_mask.mtx'
 test_prot = [args.test_prot]
 if args.rna_seq:
     data.TPM = data.x[:,100].unsqueeze(1)
@@ -208,10 +209,10 @@ res = [data.test_prot[0], args.cos, args.weighted, args.rna_seq, args.struct_neg
 
 import csv
 if args.use_ap:
-    with open('results/res_HepG2_induc_ap.csv', 'a', encoding='UTF8', newline='') as fd:
+    with open(f'results/res_{args.cell_line}_induc_ap.csv', 'a', encoding='UTF8', newline='') as fd:
         writer = csv.writer(fd)
         writer.writerow(res)
 else:
-    with open('results/res_HepG2_induc.csv', 'a', encoding='UTF8', newline='') as fd:
+    with open(f'results/res_{args.cell_line}_induc.csv', 'a', encoding='UTF8', newline='') as fd:
         writer = csv.writer(fd)
         writer.writerow(res)
