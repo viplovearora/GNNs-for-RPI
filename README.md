@@ -19,7 +19,7 @@ For transductive link prediction, use `RPI_gcn.py` to make predictions on the pa
 python RPI_gcn.py --rna_seq
 ```
 
-For transductive link prediction, use `gcn_drop.py` to make predictions on the protein selected using the `--test_prot` argument. Use `--help` command to check the other optional arguments.
+For inductive link prediction, use `gcn_drop.py` to make predictions on the protein selected using the `--test_prot` argument. Use `--help` command to check the other optional arguments.
 
 Run `gcn_transfer.py` for the transfer learning setting.
 
